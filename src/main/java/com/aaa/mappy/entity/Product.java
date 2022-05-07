@@ -4,11 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.sql.Date;
 
 @Entity
 @Data
@@ -26,7 +24,7 @@ public class Product {
 
     private String hazmatCategory;
 
-    private String hazmatClass;
+    private String classification;
 
     private String UNID;
 

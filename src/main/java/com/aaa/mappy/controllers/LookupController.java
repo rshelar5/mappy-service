@@ -7,9 +7,10 @@ import com.aaa.mappy.services.ProductSupportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,11 +38,13 @@ public class LookupController {
     }
 
     @GetMapping("/hazmatClassification/{psn}")
-    public Product getHazmatClassification(@PathVariable(name = "psn") String psn)
+    public Iterable<Product> getHazmatClassification(@PathVariable(name = "psn") String psn)
     {
-        Optional<Product> product = this.productSupportService.getHazmatClassification(psn);
-        if(product.isPresent()){
-            return product.get();
+        String [] psns = psn.split(",");
+
+        Iterable<Product> product = this.productSupportService.getHazmatClassification(Arrays.asList(psns));
+        if(product.iterator().hasNext()){
+            return product;
         }else {
             return null;
         }

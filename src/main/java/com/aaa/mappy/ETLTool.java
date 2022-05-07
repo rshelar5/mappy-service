@@ -1,8 +1,7 @@
-package com.aaa.mappy.etl.tool;
+package com.aaa.mappy;
 
-import com.aaa.mappy.MappingServiceApplication;
 import com.aaa.mappy.entity.Product;
-import com.aaa.mappy.repository.ProductRepository;
+import com.aaa.mappy.etl.tool.Util;
 import com.aaa.mappy.services.ProductSupportService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -13,14 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
 import java.io.*;
 
 import static org.springframework.util.ResourceUtils.getFile;
 
 @SpringBootApplication
-@ComponentScan("com.aaa.mappy")
 public class ETLTool implements CommandLineRunner {
 
 
@@ -68,6 +65,7 @@ public class ETLTool implements CommandLineRunner {
                         case "IBC tool v 6 pure substance.xlsx":
                             break;
                         case "Essential oils.xlsx":
+                            loadEssentialOidData(xlsxFile);
                             break;
                     }
                 }
@@ -75,6 +73,36 @@ public class ETLTool implements CommandLineRunner {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void loadEssentialOidData(File file) {
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            Workbook workbook = new XSSFWorkbook(fileInputStream);
+            Sheet sheet = workbook.getSheetAt(0);
+            for(Row row: sheet){
+                if(row.getRowNum()!= 1){
+                    Product product = new Product();
+                    for(Cell cell: row){
+
+                        switch (cell.getColumnIndex()){
+                            case 1:
+                                product.setProperShippingName(cell.getStringCellValue());
+                                break;
+                            case 2:
+                                product.setClassification(cell.getStringCellValue());
+                                break;
+                        }
+                    }
+                    this.productSupportService.save(product);
+                }
+
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void loadHazmatData(File file) {

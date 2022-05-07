@@ -44,7 +44,7 @@ public class ProductSupportService {
          return  false;
     }
 
-    public Optional<Product> getHazmatClassification(String psn) {
-        return this.productRepository.findById(psn);
+    public Iterable<Product> getHazmatClassification(Iterable<String> psn) {
+        return this.productRepository.findAllById(psn);
     }
 }
