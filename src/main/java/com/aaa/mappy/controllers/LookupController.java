@@ -42,7 +42,12 @@ public class LookupController {
     {
         String [] psns = psn.split(",");
 
-        Iterable<Product> product = this.productSupportService.getHazmatClassification(Arrays.asList(psns));
+        ArrayList<String> psnList = new ArrayList<>();
+        for (String psnString: psns) {
+            psnList.add(psnString.trim());
+        }
+
+        Iterable<Product> product = this.productSupportService.getHazmatClassification(psnList);
         if(product.iterator().hasNext()){
             return product;
         }else {
