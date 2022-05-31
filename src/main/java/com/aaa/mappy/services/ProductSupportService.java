@@ -6,8 +6,10 @@ import java.util.Optional;
 
 import com.aaa.mappy.entity.Lookup;
 import com.aaa.mappy.entity.Product;
+import com.aaa.mappy.entity.PureIngredient;
 import com.aaa.mappy.repository.LookupRepository;
 import com.aaa.mappy.repository.ProductRepository;
+import com.aaa.mappy.repository.PureIngredientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
@@ -21,6 +23,9 @@ public class ProductSupportService {
     @Autowired
     ProductRepository productRepository;
 
+    @Autowired
+    PureIngredientRepository pureIngredientRepository;
+
     public ProductSupportService(){
     
     }
@@ -28,6 +33,10 @@ public class ProductSupportService {
 
     public void save(Product product) {
         this.productRepository.save(product);
+    }
+
+    public void save(PureIngredient pureIngredient) {
+        this.pureIngredientRepository.save(pureIngredient);
     }
 
 

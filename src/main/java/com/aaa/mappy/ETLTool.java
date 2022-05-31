@@ -1,6 +1,7 @@
 package com.aaa.mappy;
 
 import com.aaa.mappy.entity.Product;
+import com.aaa.mappy.entity.PureIngredient;
 import com.aaa.mappy.etl.tool.Util;
 import com.aaa.mappy.services.ProductSupportService;
 import org.apache.poi.ss.usermodel.Cell;
@@ -63,6 +64,7 @@ public class ETLTool implements CommandLineRunner {
                             loadHazmatData(xlsxFile);
                             break;
                         case "IBC tool v 6 pure substance.xlsx":
+                            loadPureIngredients(xlsxFile);
                             break;
                         case "Essential oils.xlsx":
                             loadEssentialOidData(xlsxFile);
@@ -75,13 +77,36 @@ public class ETLTool implements CommandLineRunner {
         }
     }
 
+    private void loadPureIngredients(File xlsxFile) {
+        try{
+            FileInputStream fileInputStream = new FileInputStream(xlsxFile);
+            Workbook workbook = new XSSFWorkbook(fileInputStream);
+            Sheet sheet = workbook.getSheetAt(0).getWorkbook().getSheetAt(0);
+            for(Row row : sheet){
+            if(row.getRowNum()!= 0){
+                PureIngredient pureIngredient = new PureIngredient();
+                pureIngredient.setCASNumber(row.getCell(1).toString());
+                pureIngredient.setProperShippingName(row.getCell(2).toString());
+                pureIngredient.setHazmatCategory(row.getCell(3).toString());
+                pureIngredient.setUNID(row.getCell(4).toString());
+                pureIngredient.setHazardClass(row.getCell(5).toString());
+                pureIngredient.setPackagingGroup(row.getCell(6).toString());
+                pureIngredient.setLEHS(row.getCell(8).toString());
+                this.productSupportService.save(pureIngredient);
+            }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     private void loadEssentialOidData(File file) {
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
             Workbook workbook = new XSSFWorkbook(fileInputStream);
             Sheet sheet = workbook.getSheetAt(0);
             for(Row row: sheet){
-                if(row.getRowNum()!= 1){
+                if(row.getRowNum()!= 0){
                     Product product = new Product();
                     for(Cell cell: row){
 
@@ -111,20 +136,22 @@ public class ETLTool implements CommandLineRunner {
             Workbook workbook = new XSSFWorkbook(fileInputStream);
             Sheet sheet = workbook.getSheetAt(0);
             for(Row row: sheet){
-                Product product = new Product();
-                for(Cell cell: row){
+                if(row.getRowNum()!=0){
+                    Product product = new Product();
+                    for(Cell cell: row){
 
-                    switch (cell.getColumnIndex()){
-                        case 0:
-                            product.setProperShippingName(cell.getStringCellValue());
-                            break;
-                        case 2:
-                            product.setHazmatClassification(cell.getStringCellValue());
-                            break;
+                        switch (cell.getColumnIndex()){
+                            case 0:
+                                product.setProperShippingName(cell.getStringCellValue());
+                                break;
+                            case 2:
+                                product.setHazmatClassification(cell.getStringCellValue());
+                                break;
+                        }
                     }
-                }
-                this.productSupportService.save(product);
+                    this.productSupportService.save(product);
 
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
