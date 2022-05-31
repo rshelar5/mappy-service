@@ -1,5 +1,6 @@
 package com.aaa.mappy.services;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -47,13 +48,20 @@ public class ProductSupportService {
     public void getProductIngredients(List<String> properShippingNameList) {
     }
 
-    public void getProductPureIngredients(List<String> properShippingNameList) {
-    }
-    public boolean classifyEsentialOil(List<String> properShippingNameList) {
-         return  false;
-    }
-
     public Iterable<Product> getHazmatClassification(Iterable<String> psn) {
         return this.productRepository.findAllById(psn);
+    }
+
+    public Iterable<PureIngredient> getProductIngredientsByPSN(Iterable<String> psn) {
+        return this.pureIngredientRepository.findAllById(psn);
+    }
+
+    public List<PureIngredient> getAllByCAS(ArrayList<String> casList) {
+        List<PureIngredient> resultList = new ArrayList<>();
+        for (String casID: casList) {
+            PureIngredient byCASNumber = this.pureIngredientRepository.findByCASNumber(casID);
+            resultList.add(byCASNumber);
+        }
+        return resultList;
     }
 }

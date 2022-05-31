@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PureIngredientRepository extends CrudRepository<PureIngredient,String>{
+
+    public PureIngredient findByCASNumber(String cas);
 }

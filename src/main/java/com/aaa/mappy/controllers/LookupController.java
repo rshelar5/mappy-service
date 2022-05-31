@@ -2,6 +2,7 @@ package com.aaa.mappy.controllers;
 
 import com.aaa.mappy.entity.Lookup;
 import com.aaa.mappy.entity.Product;
+import com.aaa.mappy.entity.PureIngredient;
 import com.aaa.mappy.services.ProductSupportService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @RestController
 public class LookupController {
@@ -50,6 +52,33 @@ public class LookupController {
         Iterable<Product> product = this.productSupportService.getHazmatClassification(psnList);
         if(product.iterator().hasNext()){
             return product;
+        }else {
+            return null;
+        }
+    }
+
+    @GetMapping("/pure-ingredients/{psn}")
+    public Iterable<PureIngredient> getPureIngredients(@PathVariable(name = "psn") String psn)
+    {
+        String [] psns = psn.split(",");
+
+        ArrayList<String> psnList = new ArrayList<>();
+        ArrayList<String> casList = new ArrayList<>();
+        Pattern pattern = Pattern.compile("[0-9-]+");
+        for (String searchString: psns) {
+
+            if(pattern.matcher(searchString).matches()){
+                casList.add(searchString);
+            } else {
+                psnList.add(searchString);
+            }
+        }
+
+        Iterable<PureIngredient> psnResultList = this.productSupportService.getProductIngredientsByPSN(psnList);
+        List<PureIngredient> allByCAS = this.productSupportService.getAllByCAS(casList);
+        psnResultList.forEach(allByCAS::add);
+        if(psnList.iterator().hasNext()){
+            return allByCAS;
         }else {
             return null;
         }
