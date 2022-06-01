@@ -68,17 +68,20 @@ public class LookupController {
         for (String searchString: psns) {
 
             if(pattern.matcher(searchString).matches()){
-                casList.add(searchString);
+                casList.add(searchString.trim());
             } else {
-                psnList.add(searchString);
+                psnList.add(searchString.trim());
             }
         }
 
+        ArrayList<PureIngredient> resultList = new ArrayList<>();
         Iterable<PureIngredient> psnResultList = this.productSupportService.getProductIngredientsByPSN(psnList);
         List<PureIngredient> allByCAS = this.productSupportService.getAllByCAS(casList);
-        psnResultList.forEach(allByCAS::add);
-        if(psnList.iterator().hasNext()){
-            return allByCAS;
+        psnResultList.forEach(resultList::add);
+        allByCAS.forEach(resultList::add);
+
+        if(!resultList.isEmpty()){
+            return resultList;
         }else {
             return null;
         }
