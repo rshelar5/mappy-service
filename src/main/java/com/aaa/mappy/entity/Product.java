@@ -33,7 +33,7 @@ public class Product {
 		if (getClass() != obj.getClass())
 			return false;
 		Product other = (Product) obj;
-		return Objects.equals(classification, other.classification);
+		return Objects.equals(properShippingName.toLowerCase(), other.properShippingName.toLowerCase());
 	}
 
 	@Override
