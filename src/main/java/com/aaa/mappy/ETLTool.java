@@ -15,6 +15,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import static org.springframework.util.ResourceUtils.getFile;
 
@@ -51,6 +53,8 @@ public class ETLTool implements CommandLineRunner {
             String baseFolderPath ;
 
             baseFolderPath = reader.readLine();
+            
+            HashMap<String, Product> mapOfProducts = new HashMap<>();
 
             File baseFolder = getFile(baseFolderPath);
             File[] xlsxFiles = baseFolder.listFiles();
@@ -61,15 +65,18 @@ public class ETLTool implements CommandLineRunner {
                     switch (xlsxFile.getName()){
 
                         case "MAIN_ING-IBC.xlsx":
-                            loadHazmatData(xlsxFile);
+                            loadHazmatData(xlsxFile, mapOfProducts);
                             break;
                         case "IBC tool v 6 pure substance.xlsx":
                             loadPureIngredients(xlsxFile);
                             break;
                         case "Essential oils.xlsx":
-                            loadEssentialOidData(xlsxFile);
+                            loadEssentialOidData(xlsxFile, mapOfProducts);
                             break;
                     }
+                }
+                for(Product product : mapOfProducts.values()) {
+                	productSupportService.save(product);
                 }
             }
         } catch (Exception e) {
@@ -100,29 +107,26 @@ public class ETLTool implements CommandLineRunner {
         }
     }
 
-    private void loadEssentialOidData(File file) {
+    private void loadEssentialOidData(File file, HashMap<String, Product> mapOfProducts) {
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
             Workbook workbook = new XSSFWorkbook(fileInputStream);
             Sheet sheet = workbook.getSheetAt(0);
             for(Row row: sheet){
                 if(row.getRowNum()!= 0){
-                    Product product = new Product();
-                    for(Cell cell: row){
-
-                        switch (cell.getColumnIndex()){
-                            case 1:
-                                product.setProperShippingName(cell.getStringCellValue());
-                                break;
-                            case 2:
-                                product.setClassification(cell.getStringCellValue());
-                                break;
-                        }
+                	String psn = row.getCell(1).toString();
+                    String classification = row.getCell(2).toString();
+                    if(mapOfProducts.containsKey(psn)) {
+                    	Product product = mapOfProducts.get(psn);
+                    	product.setClassification(classification);
                     }
-                    this.productSupportService.save(product);
+                    else {
+                    	Product product = new Product();
+                    	product.setProperShippingName(psn);
+                    	product.setClassification(classification);
+                    	mapOfProducts.put(psn, product);
+                    }
                 }
-
-
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,27 +134,25 @@ public class ETLTool implements CommandLineRunner {
 
     }
 
-    private void loadHazmatData(File file) {
+    private void loadHazmatData(File file, HashMap<String, Product> mapOfProducts) {
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
             Workbook workbook = new XSSFWorkbook(fileInputStream);
             Sheet sheet = workbook.getSheetAt(0);
             for(Row row: sheet){
                 if(row.getRowNum()!=0){
-                    Product product = new Product();
-                    for(Cell cell: row){
-
-                        switch (cell.getColumnIndex()){
-                            case 0:
-                                product.setProperShippingName(cell.getStringCellValue());
-                                break;
-                            case 2:
-                                product.setHazmatClassification(cell.getStringCellValue());
-                                break;
-                        }
+                    String psn = row.getCell(0).toString();
+                    String hazmatClassification = row.getCell(2).toString();
+                    if(mapOfProducts.containsKey(psn)) {
+                    	Product product = mapOfProducts.get(psn);
+                    	product.setHazmatClassification(hazmatClassification);
                     }
-                    this.productSupportService.save(product);
-
+                    else {
+                    	Product product = new Product();
+                    	product.setProperShippingName(psn);
+                    	product.setHazmatClassification(hazmatClassification);
+                    	mapOfProducts.put(psn, product);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -162,8 +164,6 @@ public class ETLTool implements CommandLineRunner {
 
     private static int showMenu(BufferedReader reader) {
         System.out.println("1.Load data");
-        System.out.println("2.Clear data");
-        System.out.println("3.Update data");
         System.out.println("0.Exit tool");
         //TODO : fix for non int input
         try {

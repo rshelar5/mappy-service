@@ -11,21 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @RestController
 public class LookupController {
 
-
-    /*
-    getAll()
-    search(string context,string properShippingName)
-    save(Product)
-
-    * */
     @Autowired
     ProductSupportService productSupportService;
 
@@ -33,10 +25,6 @@ public class LookupController {
     public List<Lookup>  getData(){
 
          return this.productSupportService.getAll();
-    }
-
-    public void getIngredients(){
-        this.productSupportService.getProductIngredients(null);
     }
 
     @GetMapping("/hazmatClassification/{psn}")
@@ -50,14 +38,33 @@ public class LookupController {
         }
 
         Iterable<Product> product = this.productSupportService.getHazmatClassification(psnList);
-        if(product.iterator().hasNext()){
-            return product;
-        }else {
-            return null;
+        ArrayList<Product> productList = new ArrayList<>();
+        product.forEach(productList::add);
+        
+        if(psnList.size() != productList.size()) {
+        	
+        	addNotFoundEntry(psnList,productList);
         }
+        
+        return productList;
     }
 
-    @GetMapping("/pure-ingredients/{psn}")
+    private void addNotFoundEntry(ArrayList<String> psnList, ArrayList<Product> productList) {
+
+    	for(String psn :psnList) {
+    		Product product = new Product();
+    		product.setProperShippingName(psn);
+    		if(!productList.contains(product)) {
+    			product.setClassification("NOT FOUND");
+    			product.setHazmatClassification("NOT FOUND");
+    			productList.add(product);
+    		}
+    	}
+
+    	
+	}
+
+	@GetMapping("/pure-ingredients/{psn}")
     public Iterable<PureIngredient> getPureIngredients(@PathVariable(name = "psn") String psn)
     {
         String [] psns = psn.split(",");

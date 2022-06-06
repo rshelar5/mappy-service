@@ -35,4 +35,6 @@ public class PureIngredient {
     private String packagingGroup;
 
     private String LEHS;
+
+	
 }
